@@ -5,7 +5,6 @@ import android.view.View;
 
 import com.mopub.mobileads.CustomEventInterstitial;
 
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -144,12 +143,19 @@ public class SpotXInterstitial extends CustomEventInterstitial {
 
     }
 
-    private static Map<String,String> convertStringObjectMapToStringStringMap(Map<String, Object> map)
+    public static Map<String,String> convertStringObjectMapToStringStringMap(Map<String, Object> map)
     {
         Map<String, String> newMap = new HashMap<String,String>();
         for (Map.Entry<String, Object> item : map.entrySet())
         {
-            newMap.put(item.getKey(), item.getValue().toString());
+            if (item.getValue() == null)
+            {
+                newMap.put(item.getKey(), null);
+            }
+            else
+            {
+                newMap.put(item.getKey(), item.getValue().toString());
+            }
         }
 
         return newMap;

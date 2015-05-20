@@ -11,6 +11,7 @@ repositories {
     flatDir {
         dirs 'mopub-sdk-release'
     }
+    mavenCentral()
 }
 
 apply plugin: 'com.android.library'
@@ -40,4 +41,6 @@ dependencies {
     compile(name:'mopub-sdk-release', ext:'aar')
     releaseCompile project(path: ':..:spotx-sdk-android', configuration: 'release')
     debugCompile project(path: ':..:spotx-sdk-android', configuration: 'debug')
+    testCompile 'junit:junit:4.12'
+    testCompile 'com.android.support:support-v4:22.0.+'
 }
