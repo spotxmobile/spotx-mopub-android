@@ -32,11 +32,11 @@ public class SpotXInterstitial extends CustomEventInterstitial {
     /**
      * Translates VPAIDEvents back to CustomEventInterstitialListener events
      */
-    private class VpaidEventListenerShim implements VpaidEventListener
+    private class VpaidEventListenerAdapter implements VpaidEventListener
     {
         private CustomEventInterstitialListener _listener;
 
-        public VpaidEventListenerShim(CustomEventInterstitialListener listener)
+        public VpaidEventListenerAdapter(CustomEventInterstitialListener listener)
         {
             _listener = listener;
         }
@@ -74,7 +74,7 @@ public class SpotXInterstitial extends CustomEventInterstitial {
         _adView.setVisibility(View.INVISIBLE);
 
         //TODO: Use generic AdListener instead
-        _adView.setVpaidEventListener(new VpaidEventListenerShim(customEventInterstitialListener));
+        _adView.setVpaidEventListener(new VpaidEventListenerAdapter(customEventInterstitialListener));
 
         Map<String,String> localExtrasAsStrings = convertStringObjectMapToStringStringMap(localExtras);
 
