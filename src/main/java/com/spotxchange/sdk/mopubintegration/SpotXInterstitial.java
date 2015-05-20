@@ -43,13 +43,53 @@ public class SpotXInterstitial extends CustomEventInterstitial {
 
         @Override
         public void onVpaidEvent(VpaidEvent event) {
-            //TODO: VPAID -> onInterstitialLoaded
-            //TODO: VPAID -> onInterstitialFailed
-            //TODO: VPAID -> onInterstitialShown
-            //TODO: VPAID -> onInterstitialClicked
-            //TODO: VPAID -> onInterstitialDismissed
+            switch (event)
+            {
+                case AD_LOADED:
+                    _listener.onInterstitialLoaded();
+                    break;
 
-            //NOTE: onLeaveApplication not applicable here?
+                case AD_STARTED:
+                    _listener.onInterstitialShown();
+                    break;
+
+                case AD_CLICKED:
+                    //NOTE: According to MoPub spec, onLeaveApplication should be an alias for onInterstitialClicked.
+                    _listener.onInterstitialClicked();
+                    break;
+
+                case AD_STOPPED:
+                    _listener.onInterstitialDismissed();
+                    break;
+
+                case AD_ERROR:
+                    //TODO: Infer and specify which kind of error this is based off event log tracking.
+                    _listener.onInterstitialFailed(MoPubErrorCode.UNSPECIFIED);
+                    break;
+
+                case AD_LINEAR_CHANGE:
+                case AD_SIZE_CHANGE:
+                case AD_EXPANDED_CHANGE:
+                case AD_SKIPPABLE_STATE_CHANGE:
+                case AD_REMAINING_TIME_CHANGE:
+                case AD_DURATION_CHANGE:
+                case AD_VOLUME_CHANGE:
+                case AD_IMPRESSION:
+                case AD_VIDEO_START:
+                case AD_VIDEO_FIRST_QUARTILE:
+                case AD_VIDEO_MIDPOINT:
+                case AD_VIDEO_THIRD_QUARTILE:
+                case AD_VIDEO_COMPLETE:
+                case AD_SKIPPED:
+                case AD_USER_CLOSE:
+                case AD_USER_MINIMIZE:
+                case AD_INTERACTION:
+                case AD_USER_ACCEPT_INVITATION:
+                case AD_PAUSED:
+                case AD_LOG:
+                default:
+                    break;
+            }
         }
     }
 
