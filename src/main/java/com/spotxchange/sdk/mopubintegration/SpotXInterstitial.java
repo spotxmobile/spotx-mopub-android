@@ -114,7 +114,7 @@ public class SpotXInterstitial extends CustomEventInterstitial {
         //TODO: Construct and pass AdSettings here
         _adView = new SpotXView(context, PlacementType.INTERSTITIAL);
         _adView.setVisibility(View.INVISIBLE);
-        ((Activity)context).addContentView(_adView, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+        ((Activity)context).addContentView(_adView, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         Map<String,String> localExtrasAsStrings = convertStringObjectMapToStringStringMap(localExtras);
 
@@ -124,6 +124,8 @@ public class SpotXInterstitial extends CustomEventInterstitial {
                 serverExtras
                 )
             );
+
+        settings.setCanAutodisplay(false);
 
         _adView.initialize(
             1,
@@ -141,6 +143,7 @@ public class SpotXInterstitial extends CustomEventInterstitial {
     @Override
     protected void showInterstitial() {
         _adView.setVisibility(View.VISIBLE);
+        _adView.startAd();
     }
 
     @Override
