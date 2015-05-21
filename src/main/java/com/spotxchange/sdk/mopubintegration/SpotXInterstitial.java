@@ -1,7 +1,10 @@
-package com.spotxchange.sdk.mopubintegration;
+package com.mopub.mobileads;
 
+import android.app.Activity;
 import android.content.Context;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
 import com.mopub.mobileads.CustomEventInterstitial;
 
@@ -111,9 +114,7 @@ public class SpotXInterstitial extends CustomEventInterstitial {
         //TODO: Construct and pass AdSettings here
         _adView = new SpotXView(context, PlacementType.INTERSTITIAL);
         _adView.setVisibility(View.INVISIBLE);
-
-        //TODO: Use generic AdListener instead
-        _adView.setVpaidEventListener(new VpaidEventListenerAdapter(customEventInterstitialListener));
+        ((Activity)context).addContentView(_adView, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
 
         Map<String,String> localExtrasAsStrings = convertStringObjectMapToStringStringMap(localExtras);
 
@@ -125,11 +126,16 @@ public class SpotXInterstitial extends CustomEventInterstitial {
             );
 
         _adView.initialize(
-            _adView.getId(),
+            1,
             Integer.parseInt(serverExtras.get(CHANNEL_ID_KEY)),
             serverExtras.get(APP_DOMAIN_KEY),
             settings
             );
+
+        VpaidEventListener vpaidEventListener = new VpaidEventListenerAdapter(customEventInterstitialListener);
+
+        //TODO: Use generic AdListener instead
+        _adView.setVpaidEventListener(vpaidEventListener);
     }
 
     @Override
