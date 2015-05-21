@@ -1,1 +1,1 @@
-include ':mopub-sdk-release'
+include '..:spotx-sdk-android'
