@@ -2,6 +2,7 @@ package com.mopub.mobileads;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
@@ -129,8 +130,8 @@ public class SpotXInterstitial extends CustomEventInterstitial {
 
         _adView.initialize(
             1,
-            Integer.parseInt(serverExtras.get(CHANNEL_ID_KEY)),
-            serverExtras.get(APP_DOMAIN_KEY),
+            Integer.parseInt((String) settings.getPropertiesMap().get(CHANNEL_ID_KEY)),
+            (String) settings.getPropertiesMap().get(APP_DOMAIN_KEY),
             settings
             );
 
