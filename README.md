@@ -34,7 +34,7 @@ Declare the dependency in Maven:
 
 ```xml
 <dependency>
-    <groupId>com.github.satyan</groupId>
+    <groupId>com.spotxchange</groupId>
     <artifactId>spotx-mopub-android</artifactId>
     <version>1.0</version>
 </dependency>
