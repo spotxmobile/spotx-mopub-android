@@ -1,27 +1,38 @@
-# spotx-mopub-android
-MoPub plugin for integrating with SpotXchange.
+##Who Can Use the Plugin
+
+To use the plugin, you need to be a SpotXchange publisher and have an active account with MoPub.
+
+### Become a SpotXchange Publisher
+
+If you are not already a SpotXchange publisher, click [here](http://www.spotxchange.com/publishers/apply-to-become-a-spotx-publisher/) to apply.
+
+### Create a MoPub Account
+
+If you don't yet have a MoPub account, click [here](https://app.mopub.com/account/register/) to sign up.
 
 
+## What the Plugin Does
 
-## Installing
+The plugin allows the SpotX SDK and the MoPub SDK to communitate with each other seamlessly. To Use this new plugin, SpotX publishers will need to integrate the SpotX SDK and the MoPub SDK into their App.
+
+
+## How to Install the Plugin
 
 There are three ways to install this plugin:
 
+### Gradle Dependency (preferred)
 
-#### As a Gradle dependency
+Simply add the following to your Podfile.
 
-This is the preferred way. Simply add the following to your build.gradle.
-
-```
+```groovy
 compile 'com.spotxchange:spotx-mobpub-android:+'
 ```
 
-
-#### As a Maven dependency
+### As a Maven dependency
 
 Declare the dependency in Maven:
 
-```
+```xml
 <dependency>
     <groupId>com.github.satyan</groupId>
     <artifactId>spotx-mopub-android</artifactId>
@@ -29,32 +40,21 @@ Declare the dependency in Maven:
 </dependency>
 ```
 
-#### As a library project
+### As a library project
 
-Download the source code and import it as a library project in Android Studio or Eclipse. The project is available from our GitHub repository at [https://github.com/spotxmobile/spotx-mopub-android](https://github.com/spotxmobile/spotx-mopub-android).
+Download the source code and import it as a library project in Android Studio or Eclipse. The project is available from our GitHub repository [here](https://github.com/spotxmobile/spotx-mopub-android).
 
-For more information on how to do this, read [here](http://developer.android.com/tools/projects/index.html#LibraryProjects).
+Get more information on how to do this [here](http://developer.android.com/tools/projects/index.html#LibraryProjects).
 
-----------------
 
 ## Configuration
 
-### SpotXchange
-
-You'll need to apply to become a SpotX publisher if you haven't already.
-You will receive a publisher channel ID and an account to log in the [SpotXchange Publisher Tools](https://publisher.spotxchange.com/)
-
-### MoPub
-  You'll need to create an account with MoPub if you haven't already. For more information on MoPub custom events, read http://mopub
-
-You will use the custom data field to pass configuration parameters to the SpotXchange plugin. The custom data is a [JSON](http://json.org) object with the following keys:
+You will use the custom data field to pass configuration parameters to the SpotX plugin. Get more information on MoPub custom events [here](https://dev.twitter.com/mopub/ad-networks). The custom data is a [JSON](http://json.org) object with the following keys:
 
 * channel_id - Your SpotXchange  publisher channel ID
 * playstore_url - URL to your app in the Google Play store.
 * app_domain - Internet domain for your app's website
 * iab_category - IAB category used to classify your app
-* auto_init -
-* prefetch -
 * in\_app\_browser - If true, ad interactions will be displayed in an internal browser rather than the system default
 
 For step by step instructions on how to specifiy parameters through the MoPub UI, read [here](https://dev.twitter.com/mopub/ad-networks).
