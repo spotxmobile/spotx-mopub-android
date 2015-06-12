@@ -28,7 +28,7 @@ Simply add the following to your Podfile.
 compile 'com.spotxchange:spotx-mobpub-android:+'
 ```
 
-### As a Maven Dependency
+### Maven Dependency
 
 Declare the dependency in Maven:
 
