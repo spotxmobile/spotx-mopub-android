@@ -22,7 +22,7 @@ There are three ways to install this plugin:
 
 ### Gradle Dependency (preferred)
 
-Simply add the following to your Podfile.
+Simply add the following to your build.gradle.
 
 ```groovy
 compile 'com.spotxchange:spotx-mobpub-android:+'
