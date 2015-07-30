@@ -28,6 +28,8 @@ println "######################################################"
 println "Group: " + group
 println "ArtifactId: " + rootProject.name
 println "Version: " + version
+println "KEYSTORE:" + KEYSTORE
+println "GPG KEYRING:" + GPG_KEYRING
 println "######################################################"
 
 repositories {
