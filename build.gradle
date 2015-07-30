@@ -28,8 +28,6 @@ println "######################################################"
 println "Group: " + group
 println "ArtifactId: " + rootProject.name
 println "Version: " + version
-println "KEYSTORE:" + KEYSTORE
-println "KEYRING:" + GPG_KEYRING
 println "######################################################"
 
 repositories {
@@ -79,7 +77,7 @@ uploadArchives {
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
             repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-              authentication(userName: sonatype_user, password: sonatype_pass)
+              authentication(userName: SONATYPE_USER, password: SONATYPE_PASS)
             }
 
             pom.project {
