@@ -5,11 +5,13 @@ buildscript {
     dependencies {
       classpath 'com.android.tools.build:gradle:1.1.3'
       classpath 'com.github.dcendents:android-maven-plugin:1.2'
+      classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.1"
     }
 }
 
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'io.codearte.nexus-staging'
 apply plugin: 'signing'
 
 def KEYSTORE = System.getenv("KEYSTORE");
