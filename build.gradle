@@ -13,13 +13,13 @@ apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'signing'
 
 def KEYSTORE = System.getenv("KEYSTORE");
-/*def KEYSTORE_PASS = System.getenv("KEYSTORE_CREDS").split(":")[0];
-def KEYSTORE_KEY_PASS = System.getenv("KEYSTORE_CREDS").split(":")[1];
-def SONATYPE_USER = System.getenv("SONATYPE_CREDS").split(":")[0];
-def SONATYPE_PASS = System.getenv("SONATYPE_CREDS").split(":")[1];*/
+def KEYSTORE_PASS = System.getenv("KEYSTORE_PASS")
+def KEYSTORE_KEY_PASS = System.getenv("KEYSTORE_KEY_PASS")
 def GPG_KEYRING = System.getenv("GPG_KEYRING");
-/*def GPG_KEY = System.getenv("GPG_KEY").split(":")[0];
-def GPG_KEY_PASS = System.getenv("GPG_KEY").split(":")[1];*/
+def GPG_KEY = System.getenv("GPG_KEY")
+def GPG_KEY_PASS = System.getenv("GPG_KEY_PASS")
+def SONATYPE_USER = System.getenv("SONATYPE_USER")
+def SONATYPE_PASS = System.getenv("SONATYPE_PASS")
 
 group = 'com.spotxchange'
 version = '1.0.2'
@@ -30,9 +30,6 @@ println "ArtifactId: " + rootProject.name
 println "Version: " + version
 println "KEYSTORE:" + KEYSTORE
 println "KEYRING:" + GPG_KEYRING
-println "KEYSTORE_CREDS: " + System.getenv("KEYSTORE_CREDS")
-println "SONATYPE_CREDS: " + System.getenv("SONATYPE_CREDS")
-println "GPG_KEY: " + System.getenv("GPG_KEY")
 println "######################################################"
 
 repositories {
