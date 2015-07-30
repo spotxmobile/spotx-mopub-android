@@ -112,12 +112,11 @@ uploadArchives {
     }
 }
 
-signing {
-  //required { gradle.taskGraph.hasTask("uploadArchives") }
-  secretKeyRingFile  GPG_KEYRING
-  keyId GPG_KEY
-  password GPG_KEY_PASS
+allprojects { ext."signing.secretKeyRingFile" = GPG_KEYRING }
+allprojects { ext."signing.keyId" = GPG_KEY }
+allprojects { ext."signing.password" = GPG_KEY_PASS }
 
+signing {
   sign configurations.archives
 }
 
