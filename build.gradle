@@ -116,3 +116,8 @@ signing {
   required { gradle.taskGraph.hasTask("uploadArchives") }
   sign configurations.archives
 }
+
+nexusStaging {
+  packageGroup = 'com.spotxchange'
+  stagingProfileId = '42ae9b7711a5f'
+}
