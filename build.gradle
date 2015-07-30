@@ -111,5 +111,6 @@ uploadArchives {
 }
 
 signing {
+  required { gradle.taskGraph.hasTask("uploadArchives") }
   sign configurations.archives
 }
