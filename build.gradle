@@ -113,8 +113,8 @@ uploadArchives {
 }
 
 signing {
-  required { gradle.taskGraph.hasTask("uploadArchives") }
-  //sign configurations.archives
+  //required { gradle.taskGraph.hasTask("uploadArchives") }
+  sign configurations.archives
 }
 
 nexusStaging {
