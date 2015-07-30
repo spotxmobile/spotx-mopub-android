@@ -113,7 +113,11 @@ uploadArchives {
 }
 
 signing {
-  required { gradle.taskGraph.hasTask("uploadArchives") }
+  //required { gradle.taskGraph.hasTask("uploadArchives") }
+  secretKeyRingFile  GPG_KEYRING
+  keyId GPG_KEY
+  password GPG_KEY_PASS
+
   sign configurations.archives
 }
 
