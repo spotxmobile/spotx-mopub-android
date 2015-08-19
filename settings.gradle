@@ -1,1 +1,1 @@
-include '..:spotx-sdk-android'
+rootProject.name = 'spotx-mopub-android'
