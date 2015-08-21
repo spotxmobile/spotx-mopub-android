@@ -25,7 +25,7 @@ There are three ways to install this plugin:
 Simply add the following to your build.gradle.
 
 ```groovy
-compile 'com.spotxchange:spotx-mobpub-android:+'
+compile 'com.spotxchange:spotx-mopub-android:+'
 ```
 
 ### Maven Dependency
