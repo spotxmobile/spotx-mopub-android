@@ -24,7 +24,7 @@ def SONATYPE_USER = System.getenv("SONATYPE_USER")
 def SONATYPE_PASS = System.getenv("SONATYPE_PASS")
 
 group = 'com.spotxchange'
-version = '1.0.2'
+version = '2.0.0'
 
 println "######################################################"
 println "Group: " + group
