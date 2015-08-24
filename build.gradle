@@ -39,7 +39,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.robbypond:mopub-android-sdk:3.+@aar'
+    compile 'com.mopub:mopub-sdk:3.+@aar'
     compile 'com.spotxchange:spotx-sdk-android:2.0.0@aar'
 
     testCompile 'junit:junit:4.12'
