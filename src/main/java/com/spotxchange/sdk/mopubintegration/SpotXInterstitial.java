@@ -116,35 +116,39 @@ public class SpotXInterstitial extends CustomEventInterstitial {
     }
 
     public static SpotxAdSettings constructAdSettings(Map<String,Object> localSettings, Map<String, String> defaultSettings){
-        Map<String,String> localSettingsAsStrings = convertStringObjectMapToStringStringMap(localSettings);
-        String channel = (localSettingsAsStrings.containsKey(CHANNEL_ID_KEY)) ? localSettingsAsStrings.get(CHANNEL_ID_KEY) : defaultSettings.get(CHANNEL_ID_KEY);
-        String appDomain = (localSettingsAsStrings.containsKey(APP_DOMAIN_KEY)) ? localSettingsAsStrings.get(APP_DOMAIN_KEY) : defaultSettings.get(APP_DOMAIN_KEY);
+        Map<String,String> settings = defaultSettings;
+        settings.putAll(
+            convertStringObjectMapToStringStringMap(localSettings)
+            );
+
+        String channel = (settings.containsKey(CHANNEL_ID_KEY)) ? settings.get(CHANNEL_ID_KEY) : defaultSettings.get(CHANNEL_ID_KEY);
+        String appDomain = (settings.containsKey(APP_DOMAIN_KEY)) ? settings.get(APP_DOMAIN_KEY) : defaultSettings.get(APP_DOMAIN_KEY);
 
         SpotxAdSettings adSettings = new SpotxAdSettings(Integer.valueOf(channel), appDomain, "interstitial");
 
-        if(localSettingsAsStrings.containsKey(APP_STORE_URL_KEY) || localSettingsAsStrings.containsKey(PLAY_STORE_URL_KEY)) {
-            String storeUrl = localSettings.containsKey(APP_STORE_URL_KEY) ? localSettingsAsStrings.get(APP_STORE_URL_KEY) : localSettingsAsStrings.get(PLAY_STORE_URL_KEY);
+        if(settings.containsKey(APP_STORE_URL_KEY) || settings.containsKey(PLAY_STORE_URL_KEY)) {
+            String storeUrl = localSettings.containsKey(APP_STORE_URL_KEY) ? settings.get(APP_STORE_URL_KEY) : settings.get(PLAY_STORE_URL_KEY);
             adSettings.setAppStoreUrl(storeUrl);
         }
-        if(localSettingsAsStrings.containsKey(IAB_CATEGORY_KEY)) {
-            adSettings.setIabCategory(localSettingsAsStrings.get(IAB_CATEGORY_KEY));
+        if(settings.containsKey(IAB_CATEGORY_KEY)) {
+            adSettings.setIabCategory(settings.get(IAB_CATEGORY_KEY));
         }
-        if(localSettingsAsStrings.containsKey(AUTO_INIT_KEY)) {
-            boolean autoInit = (localSettingsAsStrings.get(AUTO_INIT_KEY).equals("true")) ? true : false;
+        if(settings.containsKey(AUTO_INIT_KEY)) {
+            boolean autoInit = (settings.get(AUTO_INIT_KEY).equals("true")) ? true : false;
             adSettings.setAutoInit(autoInit);
         }
-        if(localSettingsAsStrings.containsKey(PREFETCH_KEY)){
-            boolean prefetch = (localSettingsAsStrings.get(PREFETCH_KEY).equals("true")) ? true : false;
+        if(settings.containsKey(PREFETCH_KEY)){
+            boolean prefetch = (settings.get(PREFETCH_KEY).equals("true")) ? true : false;
             adSettings.setPrefetch(prefetch);
         }
-        if(localSettingsAsStrings.containsKey(IN_APP_BROWSER_KEY)){
-            boolean shouldUse = (localSettingsAsStrings.get(IN_APP_BROWSER_KEY).equals("true")) ? true : false;
+        if(settings.containsKey(IN_APP_BROWSER_KEY)){
+            boolean shouldUse = (settings.get(IN_APP_BROWSER_KEY).equals("true")) ? true : false;
             adSettings.setShouldUseInternalBrowser(shouldUse);
         }
 
         // Optional configurations for SpotXView behavior.
-        if(localSettingsAsStrings.containsKey(SECURE_CONNECTION_KEY)){
-            boolean shouldUse = (localSettingsAsStrings.get(SECURE_CONNECTION_KEY).equals("true")) ? true : false;
+        if(settings.containsKey(SECURE_CONNECTION_KEY)){
+            boolean shouldUse = (settings.get(SECURE_CONNECTION_KEY).equals("true")) ? true : false;
             adSettings.setUseSecureConnection(shouldUse);
         }
 
