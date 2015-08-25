@@ -50,6 +50,7 @@ public class SpotXInterstitial extends CustomEventInterstitial {
 
         @Override
         public void adCompleted() {
+            _adView.setVisibility(View.INVISIBLE);
             if(_customEventInterstitialListener != null) {
                 _customEventInterstitialListener.onInterstitialDismissed();
             }
