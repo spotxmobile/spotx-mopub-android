@@ -27,6 +27,7 @@ public class SpotXInterstitial extends CustomEventInterstitial {
     public static final String PREFETCH_KEY             = "prefetch";
     public static final String AUTO_INIT_KEY            = "auto_init";
     public static final String IN_APP_BROWSER_KEY       = "in_app_browser";
+    public static final String SECURE_CONNECTION_KEY    = "use_https";
 
     private SpotxAdView _adView;
 
@@ -139,6 +140,12 @@ public class SpotXInterstitial extends CustomEventInterstitial {
         if(localSettingsAsStrings.containsKey(IN_APP_BROWSER_KEY)){
             boolean shouldUse = (localSettingsAsStrings.get(IN_APP_BROWSER_KEY).equals("true")) ? true : false;
             adSettings.setShouldUseInternalBrowser(shouldUse);
+        }
+
+        // Optional configurations for SpotXView behavior.
+        if(localSettingsAsStrings.containsKey(SECURE_CONNECTION_KEY)){
+            boolean shouldUse = (localSettingsAsStrings.get(SECURE_CONNECTION_KEY).equals("true")) ? true : false;
+            adSettings.setUseSecureConnection(shouldUse);
         }
 
         return adSettings;
