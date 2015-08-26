@@ -135,21 +135,21 @@ public class SpotXInterstitial extends CustomEventInterstitial {
             adSettings.setIabCategory(settings.get(IAB_CATEGORY_KEY));
         }
         if(settings.containsKey(AUTO_INIT_KEY)) {
-            boolean autoInit = (settings.get(AUTO_INIT_KEY).equals("true")) ? true : false;
+            boolean autoInit = Boolean.parseBoolean(settings.get(AUTO_INIT_KEY));
             adSettings.setAutoInit(autoInit);
         }
         if(settings.containsKey(PREFETCH_KEY)){
-            boolean prefetch = (settings.get(PREFETCH_KEY).equals("true")) ? true : false;
+            boolean prefetch = Boolean.parseBoolean(settings.get(PREFETCH_KEY));
             adSettings.setPrefetch(prefetch);
         }
         if(settings.containsKey(IN_APP_BROWSER_KEY)){
-            boolean shouldUse = (settings.get(IN_APP_BROWSER_KEY).equals("true")) ? true : false;
+            boolean shouldUse = Boolean.parseBoolean(settings.get(IN_APP_BROWSER_KEY));
             adSettings.setShouldUseInternalBrowser(shouldUse);
         }
 
         // Optional configurations for SpotXView behavior.
         if(settings.containsKey(SECURE_CONNECTION_KEY)){
-            boolean shouldUse = (settings.get(SECURE_CONNECTION_KEY).equals("true")) ? true : false;
+            boolean shouldUse = Boolean.parseBoolean(settings.get(SECURE_CONNECTION_KEY));
             adSettings.setUseSecureConnection(shouldUse);
         }
 
