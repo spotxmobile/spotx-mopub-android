@@ -10,7 +10,7 @@ buildscript {
 apply plugin: 'com.android.library'
 apply plugin: 'signing'
 
-def KEYSTORE = ''//System.getenv("KEYSTORE");
+def KEYSTORE = System.getenv("KEYSTORE");
 def KEYSTORE_PASS = System.getenv("KEYSTORE_PASS")
 def KEYSTORE_KEY_PASS = System.getenv("KEYSTORE_KEY_PASS")
 def GPG_KEYRING = System.getenv("GPG_KEYRING");
@@ -44,8 +44,7 @@ dependencies {
 }
 
 android {
-    defaultPublishConfig "debug"
-    publishNonDefault true
+    defaultPublishConfig "release"
     compileSdkVersion 22
     buildToolsVersion "21.1.2"
 
@@ -65,11 +64,13 @@ android {
         }
     }
     signingConfigs {
-//        release {
-//            storeFile file(KEYSTORE)
-//            storePassword KEYSTORE_PASS
-//            keyAlias "spotx"
-//            keyPassword KEYSTORE_KEY_PASS
-//        }
+        release {
+            if (KEYSTORE) {
+                storeFile file(KEYSTORE)
+                storePassword KEYSTORE_PASS
+                keyAlias "spotx"
+                keyPassword KEYSTORE_KEY_PASS
+            }
+        }
     }
 }
