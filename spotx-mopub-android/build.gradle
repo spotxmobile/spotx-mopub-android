@@ -4,10 +4,14 @@ buildscript {
     }
     dependencies {
       classpath 'com.android.tools.build:gradle:1.1.3'
+      classpath 'com.github.dcendents:android-maven-plugin:1.2'
+      classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.1"
     }
 }
 
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'io.codearte.nexus-staging'
 apply plugin: 'signing'
 
 def KEYSTORE = System.getenv("KEYSTORE");
@@ -73,4 +77,54 @@ android {
             }
         }
     }
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+              authentication(userName: SONATYPE_USER, password: SONATYPE_PASS)
+            }
+
+            pom.project {
+               name 'spotx-mopub-android'
+               packaging 'aar'
+               description 'MoPub adapter for SpotXchange'
+               url 'http://www.spotxchange.com/'
+
+              licenses {
+                   license {
+                       name 'Apache'
+                       url 'http://www.apache.org/licenses/LICENSE-2.0'
+                   }
+               }
+
+               scm {
+                 url 'https://github.com/spotxmobile/spotx-mopub-android'
+               }
+
+               developers {
+                   developer {
+                       id 'spotxmobile'
+                       name 'SpotXchange Inc.'
+                   }
+               }
+           }
+        }
+    }
+}
+
+allprojects { ext."signing.secretKeyRingFile" = GPG_KEYRING }
+allprojects { ext."signing.keyId" = GPG_KEY }
+allprojects { ext."signing.password" = GPG_KEY_PASS }
+
+signing {
+  sign configurations.archives
+}
+
+nexusStaging {
+  packageGroup = 'com.spotxchange'
+  stagingProfileId = '42ae9b7711a5f'
 }
