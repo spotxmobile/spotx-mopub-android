@@ -1,4 +1,4 @@
-package com.mopub.mobileads;
+package com.spotxchange.sdk.mopubintegration;
 
 import android.app.Activity;
 import android.content.Context;
