@@ -102,7 +102,7 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo {
         _isAdAvailable = false;
         _spotxAdView.unsetAdListener();
         _spotxAdView = null;
-    }
+            }
 
     /**
      * Sets up the 3rd party ads SDK if it needs configuration. Extenders should use this
@@ -239,11 +239,11 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo {
             public Builder withChannelId(@NonNull final String channel_id) {
                 this.channel_id = channel_id;
                 return this;
-            }
+    }
 
             public SpotxMediationSettings build() {
                 return new SpotxMediationSettings(this);
-            }
+}
         }
 
         private SpotxMediationSettings(@NonNull final Builder builder) {
