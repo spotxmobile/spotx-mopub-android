@@ -5,9 +5,6 @@ import com.spotxchange.sdk.android.SpotxAdSettings;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by zmiller on 1/11/16.
- */
 public class Common
 {
     public static final String CHANNEL_ID_KEY           = "channel_id";
@@ -20,19 +17,35 @@ public class Common
     public static final String IN_APP_BROWSER_KEY       = "in_app_browser";
     public static final String SECURE_CONNECTION_KEY    = "use_https";
 
-    public static SpotxAdSettings constructAdSettings(Map<String,Object> localSettings, Map<String, String> defaultSettings){
+    public static SpotxAdSettings constructAdSettings(
+            Map<String,Object> localSettings,
+            Map<String, String> defaultSettings,
+            boolean bIsInterstitial){
+
         Map<String,String> settings = defaultSettings;
         settings.putAll(
                 convertStringObjectMapToStringStringMap(localSettings)
         );
 
-        String channel = (settings.containsKey(CHANNEL_ID_KEY)) ? settings.get(CHANNEL_ID_KEY) : defaultSettings.get(CHANNEL_ID_KEY);
-        String appDomain = (settings.containsKey(APP_DOMAIN_KEY)) ? settings.get(APP_DOMAIN_KEY) : defaultSettings.get(APP_DOMAIN_KEY);
+        String channel = (settings.containsKey(CHANNEL_ID_KEY)) ?
+                settings.get(CHANNEL_ID_KEY) :
+                defaultSettings.get(CHANNEL_ID_KEY);
 
-        SpotxAdSettings adSettings = new SpotxAdSettings(Integer.valueOf(channel), appDomain, "interstitial");
+        String appDomain = (settings.containsKey(APP_DOMAIN_KEY)) ?
+                settings.get(APP_DOMAIN_KEY) :
+                defaultSettings.get(APP_DOMAIN_KEY);
+
+        SpotxAdSettings adSettings = null;
+        if(bIsInterstitial) {
+            adSettings = new SpotxAdSettings(Integer.valueOf(channel), appDomain, "interstitial");
+        }else{
+            adSettings = new SpotxAdSettings(Integer.valueOf(channel), appDomain);
+        }
 
         if(settings.containsKey(APP_STORE_URL_KEY) || settings.containsKey(PLAY_STORE_URL_KEY)) {
-            String storeUrl = localSettings.containsKey(APP_STORE_URL_KEY) ? settings.get(APP_STORE_URL_KEY) : settings.get(PLAY_STORE_URL_KEY);
+            String storeUrl = localSettings.containsKey(APP_STORE_URL_KEY) ?
+                    settings.get(APP_STORE_URL_KEY) :
+                    settings.get(PLAY_STORE_URL_KEY);
             adSettings.setAppStoreUrl(storeUrl);
         }
         if(settings.containsKey(IAB_CATEGORY_KEY)) {

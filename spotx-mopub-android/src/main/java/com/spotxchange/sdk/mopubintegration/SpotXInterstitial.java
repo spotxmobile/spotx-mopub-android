@@ -89,7 +89,7 @@ public class SpotXInterstitial extends CustomEventInterstitial {
         )
     {
         _customEventInterstitialListener = customEventInterstitialListener;
-        SpotxAdSettings adSettings = Common.constructAdSettings(localExtras, serverExtras);
+        SpotxAdSettings adSettings = Common.constructAdSettings(localExtras, serverExtras, true);
         _adView = new SpotxAdView(context, adSettings);
         _adView.setVisibility(View.INVISIBLE);
         _adView.setAdListener(_spotxAdListener);
