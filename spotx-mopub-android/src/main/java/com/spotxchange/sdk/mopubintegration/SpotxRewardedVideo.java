@@ -40,7 +40,7 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo
     private String _sAdUnitId;
     private boolean _bIsAdAvailable;
 
-    private static final LifecycleListener _oLifecycleListener = new BaseLifecycleListener(){
+    private final LifecycleListener _oLifecycleListener = new BaseLifecycleListener(){
         @Override
         public void onPause(@NonNull final Activity activity){
             super.onResume(activity);
@@ -49,6 +49,12 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo
         @Override
         public void onResume(@NonNull final Activity activity){
             super.onResume(activity);
+        }
+
+        @Override
+        public void onBackPressed(@NonNull final Activity activity){
+            super.onBackPressed(activity);
+            _oSpotxAdView.setVisibility(View.INVISIBLE);
         }
     };
 
@@ -126,6 +132,8 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo
             return false;
         }
     }
+
+
 
     /**
      * Runs the ad-loading logic for the 3rd party SDK. localExtras & serverExtras should together
