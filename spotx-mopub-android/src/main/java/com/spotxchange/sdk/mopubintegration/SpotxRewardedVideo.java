@@ -26,50 +26,40 @@ import com.spotxchange.sdk.android.SpotxAdView;
 /**
  *
  */
-public class SpotxRewardedVideo extends CustomEventRewardedVideo
-{
+public class SpotxRewardedVideo extends CustomEventRewardedVideo {
 
     /*
      * Constants inded for internal MoPub use. Do not modify.
      */
     public static final String SPOTX_AD_NETWORK_CONSTANT = "spotx";
 
-    private SpotxAdView _oSpotxAdView;
-    private  SpotxRewardedVideoListener _oSpotxListener;
-    private boolean _bInitialized;
-    private String _sAdUnitId;
-    private boolean _bIsAdAvailable;
+    private SpotxAdView _spotxAdView;
+    private SpotxRewardedVideoListener _spotxListener;
+    private boolean _initialized;
+    private String _adUnitId;
+    private boolean _isAdAvailable;
 
-    private final LifecycleListener _oLifecycleListener = new BaseLifecycleListener(){
-        @Override
-        public void onPause(@NonNull final Activity activity){
-            super.onResume(activity);
-        }
-
-        @Override
-        public void onResume(@NonNull final Activity activity){
-            super.onResume(activity);
-        }
+    private LifecycleListener _lifecycleListener = new BaseLifecycleListener(){
 
         @Override
         public void onBackPressed(@NonNull final Activity activity){
-            super.onBackPressed(activity);
-            _oSpotxAdView.setVisibility(View.INVISIBLE);
+            _spotxAdView.setVisibility(View.INVISIBLE);
+            _isAdAvailable = false;
         }
     };
 
     public SpotxRewardedVideo(){
-        _oSpotxAdView = null;
-        _bIsAdAvailable = false;
-        _oSpotxListener = new SpotxRewardedVideoListener();
-        _bInitialized = false;
-        _sAdUnitId = null;
+
+        _initialized = _spotxAdView != null;
+        _spotxListener = _spotxListener == null ? new SpotxRewardedVideoListener() : _spotxListener;
+        _isAdAvailable = false;
+        _adUnitId = null;
     }
 
     @Nullable
     @Override
     protected CustomEventRewardedVideoListener getVideoListenerForSdk() {
-        return _oSpotxListener;
+        return _spotxListener;
     }
 
     /**
@@ -81,7 +71,7 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo
     @Nullable
     // @VisibleForTesting
     protected LifecycleListener getLifecycleListener(){
-        return _oLifecycleListener;
+        return _lifecycleListener;
     }
 
     /**
@@ -102,7 +92,9 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo
      * and should not be shut down or cleaned up.
      */
     protected void onInvalidate(){
-        _bIsAdAvailable = false;
+        _isAdAvailable = false;
+        _spotxAdView.unsetAdListener();
+        _spotxAdView = null;
     }
 
     /**
@@ -112,28 +104,23 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo
      *
      * @return true if the SDK performed initialization, false if the SDK was already initialized.
      */
-    protected  boolean checkAndInitializeSdk(
-            @NonNull Activity launcherActivity,
-            @NonNull Map<String, Object> localExtras,
-            @NonNull Map<String, String> serverExtras)
-            throws Exception{
+    @NonNull
+    protected  boolean checkAndInitializeSdk(Activity launcherActivity, @NonNull Map<String, Object> localExtras,
+            @NonNull Map<String, String> serverExtras) throws Exception{
 
         synchronized (SpotxRewardedVideo.class){
-            if(!_bInitialized){
-                SpotxAdSettings adSettings = Common.constructAdSettings(
-                        localExtras,
-                        serverExtras,
-                        false);
-
-                _oSpotxAdView = new SpotxAdView(launcherActivity, adSettings);
-                _bInitialized = true;
+            if(!_initialized){
+                SpotxAdSettings adSettings = Common.constructAdSettings(localExtras, serverExtras, false);
+                _spotxAdView = new SpotxAdView(launcherActivity, adSettings);
+                _spotxAdView.setAdListener(_spotxListener);
+                launcherActivity.addContentView(_spotxAdView, new RelativeLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                _initialized = true;
                 return true;
             }
             return false;
         }
     }
-
-
 
     /**
      * Runs the ad-loading logic for the 3rd party SDK. localExtras & serverExtras should together
@@ -150,28 +137,15 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo
      * @param localExtras
      * @param serverExtras
      */
-    protected  void loadWithSdkInitialized(
-            @NonNull Activity activity,
-            @NonNull Map<String, Object> localExtras,
-            @NonNull Map<String, String> serverExtras)
-            throws Exception{
+    @NonNull
+    protected void loadWithSdkInitialized(Activity activity, Map<String, Object> localExtras,
+            Map<String, String> serverExtras) throws Exception{
 
-        SpotxAdSettings adSettings = Common.constructAdSettings(localExtras, serverExtras, false);
-        _oSpotxAdView.setAdSettings(adSettings);
-        _oSpotxAdView.setAdListener(_oSpotxListener);
-        _oSpotxAdView.setVisibility(View.INVISIBLE);
-
-        activity.addContentView(
-                _oSpotxAdView,
-                new RelativeLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT));
-
-        _oSpotxAdView.init();
-
+        _spotxAdView.setVisibility(View.INVISIBLE);
+        _spotxAdView.init();
         Object adUnitObject = localExtras.get(DataKeys.AD_UNIT_ID_KEY);
         if(adUnitObject instanceof String){
-            this._sAdUnitId = (String) adUnitObject;
+            this._adUnitId = (String) adUnitObject;
         }
     }
 
@@ -183,64 +157,68 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo
      */
     @Override
     protected boolean hasVideoAvailable(){
-        return _bIsAdAvailable;
+        return _isAdAvailable;
     }
 
     /**
      * Implementers should now play the rewarded video for this custom event.
      */
     protected void showVideo(){
-        _oSpotxAdView.setVisibility(View.VISIBLE);
+        _spotxAdView.setVisibility(View.VISIBLE);
     }
 
-    private class SpotxRewardedVideoListener
-            implements CustomEventRewardedVideoListener, SpotxAdListener {
+    private class SpotxRewardedVideoListener implements CustomEventRewardedVideoListener, SpotxAdListener {
+
+        // There are times where it takes the adView too long to retrieve an ad.  If this time extends more than
+        // 30 seconds then mopub will timeout and mark the ad as 'invalid.'  MoPub never communicates the timeout
+        // to the adView, therefore there are times where the adView will invoke a SpotxAdListener event even
+        // though MoPub has moved on.  In order to not invoke false MoPub events, the events will only fire if the ad
+        // is not invalid
 
         @Override
         public void adLoaded() {
-            MoPubRewardedVideoManager.onRewardedVideoLoadSuccess(
-                    SpotxRewardedVideo.class,
-                    SPOTX_AD_NETWORK_CONSTANT);
-            _bIsAdAvailable = true;
+
+            MoPubRewardedVideoManager.onRewardedVideoLoadSuccess(SpotxRewardedVideo.class, SPOTX_AD_NETWORK_CONSTANT);
+            _isAdAvailable = true;
+
         }
 
         @Override
         public void adStarted() {
-            MoPubRewardedVideoManager.onRewardedVideoStarted(
-                    SpotxRewardedVideo.class,
-                    SPOTX_AD_NETWORK_CONSTANT);
+
+            MoPubRewardedVideoManager.onRewardedVideoStarted(SpotxRewardedVideo.class, SPOTX_AD_NETWORK_CONSTANT);
         }
 
         @Override
         public void adCompleted() {
-            _oSpotxAdView.setVisibility(View.INVISIBLE);
-            MoPubRewardedVideoManager.onRewardedVideoCompleted(
-                    SpotxRewardedVideo.class,
-                    SPOTX_AD_NETWORK_CONSTANT,
+
+            _spotxAdView.setVisibility(View.INVISIBLE);
+            MoPubRewardedVideoManager.onRewardedVideoCompleted(SpotxRewardedVideo.class, SPOTX_AD_NETWORK_CONSTANT,
                     MoPubReward.success(MoPubReward.NO_REWARD_LABEL, MoPubReward.NO_REWARD_AMOUNT));
+            _isAdAvailable = false;
         }
 
         @Override
         public void adError() {
+
             MoPubRewardedVideoManager.onRewardedVideoLoadFailure(
                     SpotxRewardedVideo.class,
                     SPOTX_AD_NETWORK_CONSTANT,
                     MoPubErrorCode.UNSPECIFIED);
+            _isAdAvailable = false;
         }
 
         @Override
         public void adExpired() {
-            MoPubRewardedVideoManager.onRewardedVideoLoadFailure(
-                    SpotxRewardedVideo.class,
-                    SPOTX_AD_NETWORK_CONSTANT,
+
+            MoPubRewardedVideoManager.onRewardedVideoLoadFailure(SpotxRewardedVideo.class, SPOTX_AD_NETWORK_CONSTANT,
                     MoPubErrorCode.UNSPECIFIED);
+            _isAdAvailable = false;
         }
 
         @Override
         public void adClicked() {
-            MoPubRewardedVideoManager.onRewardedVideoClicked(
-                    SpotxRewardedVideo.class,
-                    SPOTX_AD_NETWORK_CONSTANT);
+            MoPubRewardedVideoManager.onRewardedVideoClicked(SpotxRewardedVideo.class, SPOTX_AD_NETWORK_CONSTANT);
         }
     }
 

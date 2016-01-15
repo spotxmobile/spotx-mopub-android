@@ -40,10 +40,11 @@ repositories {
 }
 
 dependencies {
-    compile('com.mopub:mopub-sdk:3.11.0@aar') {
+    compile('com.mopub:mopub-sdk:4.3.0@aar') {
         transitive = true
     }
-    compile 'com.spotxchange:spotx-sdk-android:2.0.0@aar'
+    compile 'com.spotxchange:spotx-sdk-android:2.1.0@aar'
+    //compile project(path: ':..:spotx-sdk')
     //compile 'com.google.android.gms:play-services-ads:7.0.0'
 }
 
