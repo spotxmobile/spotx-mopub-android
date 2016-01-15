@@ -33,14 +33,13 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo {
      */
     public static final String SPOTX_AD_NETWORK_CONSTANT = "spotx";
 
-    private SpotxAdView _spotxAdView;
-    private SpotxRewardedVideoListener _spotxListener;
-    private boolean _initialized;
+    private static SpotxAdView _spotxAdView;
+    private static SpotxRewardedVideoListener _spotxListener;
+    private static boolean _initialized;
+    private static boolean _isAdAvailable;
     private String _adUnitId;
-    private boolean _isAdAvailable;
 
-    private LifecycleListener _lifecycleListener = new BaseLifecycleListener(){
-
+    private static LifecycleListener _lifecycleListener = new BaseLifecycleListener(){
 
         @Override
         public void onBackPressed(@NonNull final Activity activity){
@@ -218,7 +217,6 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo {
 
         @Override
         public void adClicked() {
-
             MoPubRewardedVideoManager.onRewardedVideoClicked(SpotxRewardedVideo.class, SPOTX_AD_NETWORK_CONSTANT);
         }
     }
