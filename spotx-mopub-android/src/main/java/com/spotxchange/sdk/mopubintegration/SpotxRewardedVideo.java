@@ -41,6 +41,7 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo {
 
     private LifecycleListener _lifecycleListener = new BaseLifecycleListener(){
 
+
         @Override
         public void onBackPressed(@NonNull final Activity activity){
             _spotxAdView.setVisibility(View.INVISIBLE);
@@ -180,7 +181,6 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo {
 
             MoPubRewardedVideoManager.onRewardedVideoLoadSuccess(SpotxRewardedVideo.class, SPOTX_AD_NETWORK_CONSTANT);
             _isAdAvailable = true;
-
         }
 
         @Override
@@ -218,6 +218,7 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo {
 
         @Override
         public void adClicked() {
+
             MoPubRewardedVideoManager.onRewardedVideoClicked(SpotxRewardedVideo.class, SPOTX_AD_NETWORK_CONSTANT);
         }
     }
