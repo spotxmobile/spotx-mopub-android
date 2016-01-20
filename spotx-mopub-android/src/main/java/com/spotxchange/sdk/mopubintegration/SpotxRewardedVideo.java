@@ -46,6 +46,13 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo {
             _spotxAdView.setVisibility(View.INVISIBLE);
             _isAdAvailable = false;
         }
+
+        @Override
+        public void onDestroy(@NonNull final Activity activity){
+            _spotxAdView.setVisibility(View.INVISIBLE);
+            _spotxAdView.unsetAdListener();
+            _spotxAdView = null;
+        }
     };
 
     public SpotxRewardedVideo(){
@@ -127,6 +134,7 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo {
                 _initialized = true;
                 return true;
             }
+
             return false;
         }
     }
@@ -177,12 +185,6 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo {
     }
 
     private class SpotxRewardedVideoListener implements CustomEventRewardedVideoListener, SpotxAdListener {
-
-        // There are times where it takes the adView too long to retrieve an ad.  If this time extends more than
-        // 30 seconds then mopub will timeout and mark the ad as 'invalid.'  MoPub never communicates the timeout
-        // to the adView, therefore there are times where the adView will invoke a SpotxAdListener event even
-        // though MoPub has moved on.  In order to not invoke false MoPub events, the events will only fire if the ad
-        // is not invalid
 
         @Override
         public void adLoaded() {
