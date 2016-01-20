@@ -116,16 +116,8 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo {
             @NonNull Map<String, String> serverExtras) throws Exception{
 
         synchronized (SpotxRewardedVideo.class){
+
             if(!_initialized){
-
-                SpotxMediationSettings ms = MoPubRewardedVideoManager
-                        .getGlobalMediationSettings(SpotxMediationSettings.class);
-
-                String channel_id = (ms != null && ms.channel_id != null) ? ms.channel_id : "";
-                if(!channel_id.isEmpty()){
-                    serverExtras.put(Common.CHANNEL_ID_KEY, channel_id);
-                }
-
                 SpotxAdSettings adSettings = Common.constructAdSettings(localExtras, serverExtras, false);
                 _spotxAdView = new SpotxAdView(launcherActivity, adSettings);
                 _spotxAdView.setAdListener(_spotxListener);
@@ -158,12 +150,16 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo {
     protected void loadWithSdkInitialized(Activity activity, Map<String, Object> localExtras,
             Map<String, String> serverExtras) throws Exception{
 
+        this._adUnitId = (String)localExtras.get(DataKeys.AD_UNIT_ID_KEY);
+        SpotxMediationSettings ms = MoPubRewardedVideoManager.getInstanceMediationSettings(SpotxMediationSettings.class, this._adUnitId);
+        String channel_id = (ms != null && ms.channel_id != null) ? ms.channel_id : "";
+        if(!channel_id.isEmpty()){
+            localExtras.put(Common.CHANNEL_ID_KEY, channel_id);
+        }
+
+        SpotxAdSettings adSettings = Common.constructAdSettings(localExtras, serverExtras, false);
         _spotxAdView.setVisibility(View.INVISIBLE);
         _spotxAdView.init();
-        Object adUnitObject = localExtras.get(DataKeys.AD_UNIT_ID_KEY);
-        if(adUnitObject instanceof String){
-            this._adUnitId = (String) adUnitObject;
-        }
     }
 
     /**
