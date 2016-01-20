@@ -158,6 +158,7 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo {
         }
 
         SpotxAdSettings adSettings = Common.constructAdSettings(localExtras, serverExtras, false);
+        _spotxAdView.setAdSettings(adSettings);
         _spotxAdView.setVisibility(View.INVISIBLE);
         _spotxAdView.init();
     }
