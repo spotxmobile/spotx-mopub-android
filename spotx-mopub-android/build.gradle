@@ -4,15 +4,17 @@ buildscript {
     }
     dependencies {
       classpath 'com.android.tools.build:gradle:1.1.3'
-      classpath 'com.github.dcendents:android-maven-gradle-plugin:1.3+'
-      classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.1"
     }
 }
 
+plugins {
+    id "com.jfrog.bintray" version "1.3.1"
+}
+
 apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'io.codearte.nexus-staging'
-apply plugin: 'signing'
+//apply plugin: 'signing'
+//apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
 def KEYSTORE = System.getenv("KEYSTORE");
 def KEYSTORE_PASS = System.getenv("KEYSTORE_PASS")
@@ -24,7 +26,7 @@ def SONATYPE_USER = System.getenv("SONATYPE_USER")
 def SONATYPE_PASS = System.getenv("SONATYPE_PASS")
 
 group = 'com.spotxchange'
-version = '2.0.0'
+version = '2.2.0'
 
 println "######################################################"
 println "Group: " + group
@@ -43,9 +45,7 @@ dependencies {
     compile('com.mopub:mopub-sdk:4.3.0@aar') {
         transitive = true
     }
-    compile 'com.spotxchange:spotx-sdk-android:2.1.0@aar'
-    //compile project(path: ':..:spotx-sdk')
-    //compile 'com.google.android.gms:play-services-ads:7.0.0'
+    compile 'com.spotxchange:spotx-sdk-android:2.2+@aar'
 }
 
 android {
@@ -80,52 +80,36 @@ android {
     }
 }
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-              authentication(userName: SONATYPE_USER, password: SONATYPE_PASS)
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
+    pkg {
+        repo = 'maven'
+        name = 'com.spotxchange:spotx-mopub-android'
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/spotxmobile/spotx-mopub-android.git'
+        version {
+            name = '2.2.0'
+            desc = 'MoPub SDK Plugin for SpotX'
+            mavenCentralSync {
+                sync = false
+                user = 'userToken'
+                password = 'paasword'
+                close = '1'
             }
-
-            pom.project {
-               name 'spotx-mopub-android'
-               packaging 'aar'
-               description 'MoPub adapter for SpotXchange'
-               url 'http://www.spotxchange.com/'
-
-              licenses {
-                   license {
-                       name 'Apache'
-                       url 'http://www.apache.org/licenses/LICENSE-2.0'
-                   }
-               }
-
-               scm {
-                 url 'https://github.com/spotxmobile/spotx-mopub-android'
-               }
-
-               developers {
-                   developer {
-                       id 'spotxmobile'
-                       name 'SpotXchange Inc.'
-                   }
-               }
-           }
         }
     }
+    publications = ['spotx_mopub_android']
+
 }
 
-allprojects { ext."signing.secretKeyRingFile" = GPG_KEYRING }
-allprojects { ext."signing.keyId" = GPG_KEY }
-allprojects { ext."signing.password" = GPG_KEY_PASS }
-
-signing {
-  sign configurations.archives
-}
-
-nexusStaging {
-  packageGroup = 'com.spotxchange'
-  stagingProfileId = '42ae9b7711a5f'
+publishing {
+    publications {
+        spotx_mopub_android(MavenPublication) {
+            groupId 'com.spotxchange'
+            artifactId 'spotx-mopub-android'
+            version '2.2.0'
+            //from components.java
+        }
+    }
 }
