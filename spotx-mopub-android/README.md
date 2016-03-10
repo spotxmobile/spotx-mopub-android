@@ -58,3 +58,40 @@ Use the custom data field to pass configuration parameters to the SpotX plugin. 
 * in\_app\_browser - If true, ad interactions will be displayed in an internal browser rather than the system default
 
 Get step-by-step instructions on how to specify parameters through the MoPub UI [here](https://dev.twitter.com/mopub/ad-networks).
+
+## Rewarded Video
+
+Before integrating the SpotX custom event class library for MoPub reewarded video, please review the [Rewarded Video for Android Documentation](https://github.com/mopub/mopub-android-sdk/wiki/Rewarded-Video-Integration).
+
+Follow the instructions in the Basic Integration section of the documentation.  If you have already installed the SpotX-MoPub-Plugin, you will have completed step one of the integration process.
+
+### Rewarded Video - SpotX Mediation Settings
+
+Mediation settings may be used to pass additional configuration parameters to the SpotX network during the rwarded video load call. The scurrent SpotX mediation settings class contains the following function, where channel_id is your SpotX publisher channel ID.:
+
+```java
+withChannelId(String channel_id)
+```
+
+The following code snipit demonstrates how to initialize and load a rewarded video:
+
+```java
+// Initialize the rewarded video
+
+MoPub.initializeRewardedVideo(this);
+MoPub.onCreate(this);
+
+// Optionally, create and set the rewarded video listener
+
+MoPubRewardedVideoListener rewardedVideoListener = new MoPubRewardedVideoListener(){...};
+MoPub.setRewardedVideoListener(rewardedVideoListener);
+
+// Create the SpotxMediationSettings object
+SpotxMediationSettings sptxMediationSettings = new SpotxMediationSettings
+	.Builder()
+    .withChannelId(MY_SPOTX_CHANNEL_ID)
+    .build();
+
+// Load the rewarded video
+MoPub.loadRewardedVideo(MY_MOPUB_AD_UNIT_ID, sptxMediationSettings);
+```
