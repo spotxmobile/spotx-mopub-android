@@ -3,25 +3,26 @@ package com.spotxchange.sdk.mopubintegration;
 import com.mopub.mobileads.CustomEventRewardedVideo;
 
 import android.app.Activity;
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.RelativeLayout;
 
 import com.mopub.common.DataKeys;
 import com.mopub.common.LifecycleListener;
-import com.mopub.common.BaseLifecycleListener;
 import com.mopub.common.MediationSettings;
 import com.mopub.common.MoPubReward;
 import com.mopub.mobileads.MoPubErrorCode;
 import com.mopub.mobileads.MoPubRewardedVideoManager;
+import com.spotxchange.v3.SpotX;
+import com.spotxchange.v3.SpotXAd;
+import com.spotxchange.v3.SpotXAdBuilder;
+import com.spotxchange.v3.SpotXAdGroup;
+import com.spotxchange.v3.view.InterstitialPresentationController;
 
 import java.util.*;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
-import com.spotxchange.sdk.android.SpotxAdListener;
-import com.spotxchange.sdk.android.SpotxAdSettings;
-import com.spotxchange.sdk.android.SpotxAdView;
 
 /**
  *
@@ -33,32 +34,18 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo {
      */
     public static final String SPOTX_AD_NETWORK_CONSTANT = "spotx";
 
-    private static SpotxAdView _spotxAdView;
     private static SpotxRewardedVideoListener _spotxListener;
     private static boolean _initialized;
     private static boolean _isAdAvailable;
     private String _adUnitId;
+    private Context _ctx;
+    private Future<SpotXAdGroup> _adFuture;
+    private SpotXAdGroup _adGroup;
 
-    private static LifecycleListener _lifecycleListener = new BaseLifecycleListener(){
-
-        @Override
-        public void onBackPressed(@NonNull final Activity activity){
-            _spotxAdView.setVisibility(View.INVISIBLE);
-            _isAdAvailable = false;
-        }
-
-        @Override
-        public void onDestroy(@NonNull final Activity activity){
-            _spotxAdView.setVisibility(View.INVISIBLE);
-            _spotxAdView.unsetAdListener();
-            _spotxAdView = null;
-        }
-    };
 
     public SpotxRewardedVideo(){
-
-        _initialized = _spotxAdView != null;
-        _spotxListener = _spotxListener == null ? new SpotxRewardedVideoListener() : _spotxListener;
+        _initialized = false;
+        _spotxListener = new SpotxRewardedVideoListener();
         _isAdAvailable = false;
         _adUnitId = null;
     }
@@ -69,16 +56,10 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo {
         return _spotxListener;
     }
 
-    /**
-     * Provides a {@link LifecycleListener} if the custom event's ad network wishes to be notified of
-     * activity lifecycle events in the application.
-     *
-     * @return a LifecycleListener. May be null.
-     */
     @Nullable
-    // @VisibleForTesting
-    protected LifecycleListener getLifecycleListener(){
-        return _lifecycleListener;
+    @Override
+    protected LifecycleListener getLifecycleListener() {
+        return null;
     }
 
     /**
@@ -99,10 +80,10 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo {
      * and should not be shut down or cleaned up.
      */
     protected void onInvalidate(){
-        _isAdAvailable = false;
-        _spotxAdView.unsetAdListener();
-        _spotxAdView = null;
-            }
+        _adFuture = null;
+        _adGroup = null;
+        _spotxListener = null;
+    }
 
     /**
      * Sets up the 3rd party ads SDK if it needs configuration. Extenders should use this
@@ -118,11 +99,8 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo {
         synchronized (SpotxRewardedVideo.class){
 
             if(!_initialized){
-                SpotxAdSettings adSettings = Common.constructAdSettings(localExtras, serverExtras, false);
-                _spotxAdView = new SpotxAdView(launcherActivity, adSettings);
-                _spotxAdView.setAdListener(_spotxListener);
-                launcherActivity.addContentView(_spotxAdView, new RelativeLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                _ctx = launcherActivity.getApplicationContext();
+                SpotX.initialize(_ctx);
                 _initialized = true;
                 return true;
             }
@@ -150,17 +128,34 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo {
     protected void loadWithSdkInitialized(Activity activity, Map<String, Object> localExtras,
             Map<String, String> serverExtras) throws Exception{
 
-        this._adUnitId = (String)localExtras.get(DataKeys.AD_UNIT_ID_KEY);
-        SpotxMediationSettings ms = MoPubRewardedVideoManager.getInstanceMediationSettings(SpotxMediationSettings.class, this._adUnitId);
+        // Deconstruct the mediation setings
+        _adUnitId = (String)localExtras.get(DataKeys.AD_UNIT_ID_KEY);
+        SpotxMediationSettings ms = MoPubRewardedVideoManager.getInstanceMediationSettings(SpotxMediationSettings.class,
+                _adUnitId);
+
+        // Get and store the mediation settings channel id
         String channel_id = (ms != null && ms.channel_id != null) ? ms.channel_id : "";
         if(!channel_id.isEmpty()){
             localExtras.put(Common.CHANNEL_ID_KEY, channel_id);
         }
 
-        SpotxAdSettings adSettings = Common.constructAdSettings(localExtras, serverExtras, false);
-        _spotxAdView.setAdSettings(adSettings);
-        _spotxAdView.setVisibility(View.INVISIBLE);
-        _spotxAdView.init();
+        // Merge all settings objects and get an AdBuilder
+        Map<String, String> adSettings = Common.mergeSettings(localExtras, serverExtras);
+        SpotXAdBuilder sab = SpotX.newAdBuilder(adSettings.get("channel_id"));
+
+        // Load the video
+        try {
+            _adFuture = sab.load();
+            _adGroup = _adFuture.get(10000, TimeUnit.MILLISECONDS);
+            _adGroup.registerObserver(_spotxListener);
+            MoPubRewardedVideoManager.onRewardedVideoLoadSuccess(SpotxRewardedVideo.class, SPOTX_AD_NETWORK_CONSTANT);
+            _isAdAvailable = true;
+
+        } catch(Exception e) {
+            MoPubRewardedVideoManager.onRewardedVideoLoadFailure(SpotxRewardedVideo.class, SPOTX_AD_NETWORK_CONSTANT,
+                    MoPubErrorCode.UNSPECIFIED);
+            _isAdAvailable = false;
+        }
     }
 
     /**
@@ -178,36 +173,33 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo {
      * Implementers should now play the rewarded video for this custom event.
      */
     protected void showVideo(){
-        _spotxAdView.setVisibility(View.VISIBLE);
+        InterstitialPresentationController.show(_ctx, _adGroup);
     }
 
-    private class SpotxRewardedVideoListener implements CustomEventRewardedVideoListener, SpotxAdListener {
+    private class SpotxRewardedVideoListener implements CustomEventRewardedVideoListener, SpotXAdGroup.Observer {
 
         @Override
-        public void adLoaded() {
-
-            MoPubRewardedVideoManager.onRewardedVideoLoadSuccess(SpotxRewardedVideo.class, SPOTX_AD_NETWORK_CONSTANT);
-            _isAdAvailable = true;
-        }
-
-        @Override
-        public void adStarted() {
-
+        public void onGroupStart() {
             MoPubRewardedVideoManager.onRewardedVideoStarted(SpotxRewardedVideo.class, SPOTX_AD_NETWORK_CONSTANT);
         }
 
         @Override
-        public void adCompleted() {
+        public void onStart(SpotXAd spotXAd) {
 
-            _spotxAdView.setVisibility(View.INVISIBLE);
-            MoPubRewardedVideoManager.onRewardedVideoCompleted(SpotxRewardedVideo.class, SPOTX_AD_NETWORK_CONSTANT,
-                    MoPubReward.success(MoPubReward.NO_REWARD_LABEL, MoPubReward.NO_REWARD_AMOUNT));
-            _isAdAvailable = false;
         }
 
         @Override
-        public void adError() {
+        public void onComplete(SpotXAd spotXAd) {
 
+        }
+
+        @Override
+        public void onSkip(SpotXAd spotXAd) {
+
+        }
+
+        @Override
+        public void onError(SpotXAd spotXAd, Error error) {
             MoPubRewardedVideoManager.onRewardedVideoLoadFailure(
                     SpotxRewardedVideo.class,
                     SPOTX_AD_NETWORK_CONSTANT,
@@ -216,15 +208,19 @@ public class SpotxRewardedVideo extends CustomEventRewardedVideo {
         }
 
         @Override
-        public void adExpired() {
-
-            MoPubRewardedVideoManager.onRewardedVideoLoadFailure(SpotxRewardedVideo.class, SPOTX_AD_NETWORK_CONSTANT,
-                    MoPubErrorCode.UNSPECIFIED);
+        public void onGroupComplete() {
+            MoPubRewardedVideoManager.onRewardedVideoCompleted(SpotxRewardedVideo.class, SPOTX_AD_NETWORK_CONSTANT,
+                    MoPubReward.success(MoPubReward.NO_REWARD_LABEL, MoPubReward.NO_REWARD_AMOUNT));
             _isAdAvailable = false;
         }
 
         @Override
-        public void adClicked() {
+        public void onTimeUpdate(SpotXAd spotXAd, int i) {
+
+        }
+
+        @Override
+        public void onClick(SpotXAd spotXAd) {
             MoPubRewardedVideoManager.onRewardedVideoClicked(SpotxRewardedVideo.class, SPOTX_AD_NETWORK_CONSTANT);
         }
     }

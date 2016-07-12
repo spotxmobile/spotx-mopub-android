@@ -11,60 +11,68 @@ import com.mopub.mobileads.CustomEventInterstitial;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import com.mopub.mobileads.MoPubErrorCode;
-import com.spotxchange.sdk.android.SpotxAdListener;
-import com.spotxchange.sdk.android.SpotxAdSettings;
-import com.spotxchange.sdk.android.SpotxAdView;
+import com.spotxchange.v3.SpotX;
+import com.spotxchange.v3.SpotXAd;
+import com.spotxchange.v3.SpotXAdBuilder;
+import com.spotxchange.v3.SpotXAdGroup;
+import com.spotxchange.v3.view.InterstitialPresentationController;
 
 
 public class SpotXInterstitial extends CustomEventInterstitial {
 
-    private SpotxAdView _adView;
-
     private CustomEventInterstitialListener _customEventInterstitialListener;
+    private Context _ctx;
+    private Future<SpotXAdGroup> _adFuture;
+    private SpotXAdGroup _adGroup;
 
-    private final SpotxAdListener _spotxAdListener = new SpotxAdListener() {
+    private final SpotXAdGroup.Observer _spotxAdListener = new SpotXAdGroup.Observer() {
         @Override
-        public void adLoaded() {
-            if(_customEventInterstitialListener != null) {
-                _customEventInterstitialListener.onInterstitialLoaded();
-            }
-        }
-
-        @Override
-        public void adStarted() {
+        public void onGroupStart() {
             if(_customEventInterstitialListener != null) {
                 _customEventInterstitialListener.onInterstitialShown();
             }
         }
 
         @Override
-        public void adCompleted() {
-            _adView.setVisibility(View.INVISIBLE);
+        public void onStart(SpotXAd spotXAd) {
+        }
+
+        @Override
+        public void onComplete(SpotXAd spotXAd) {
+
+        }
+
+        @Override
+        public void onSkip(SpotXAd spotXAd) {
+
+        }
+
+        @Override
+        public void onError(SpotXAd spotXAd, Error error) {
+            if(_customEventInterstitialListener != null) {
+                //TODO: Infer and specify which kind of error this is based off event log tracking.
+                _customEventInterstitialListener.onInterstitialFailed(MoPubErrorCode.UNSPECIFIED);
+            }
+        }
+
+        @Override
+        public void onGroupComplete() {
             if(_customEventInterstitialListener != null) {
                 _customEventInterstitialListener.onInterstitialDismissed();
             }
         }
 
         @Override
-        public void adError() {
-            if(_customEventInterstitialListener != null) {
-                //TODO: Infer and specify which kind of error this is based off event log tracking.
-                _customEventInterstitialListener.onInterstitialFailed(MoPubErrorCode.UNSPECIFIED);
-            }
+        public void onTimeUpdate(SpotXAd spotXAd, int i) {
+
         }
 
         @Override
-        public void adExpired() {
-            if(_customEventInterstitialListener != null) {
-                //TODO: Infer and specify which kind of error this is based off event log tracking.
-                _customEventInterstitialListener.onInterstitialFailed(MoPubErrorCode.UNSPECIFIED);
-            }
-        }
-
-        @Override
-        public void adClicked() {
+        public void onClick(SpotXAd spotXAd) {
             if(_customEventInterstitialListener != null) {
                 _customEventInterstitialListener.onInterstitialClicked();
             }
@@ -88,22 +96,36 @@ public class SpotXInterstitial extends CustomEventInterstitial {
         Map<String, String> serverExtras
         )
     {
+        _ctx = context;
         _customEventInterstitialListener = customEventInterstitialListener;
-        SpotxAdSettings adSettings = Common.constructAdSettings(localExtras, serverExtras, true);
-        _adView = new SpotxAdView(context, adSettings);
-        _adView.setVisibility(View.INVISIBLE);
-        _adView.setAdListener(_spotxAdListener);
-        ((Activity)context).addContentView(_adView, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        _adView.init();
+        Map<String, String> settings = Common.mergeSettings(localExtras, serverExtras);
+        SpotX.initialize(_ctx);
+        SpotXAdBuilder sab = SpotX.newAdBuilder(settings.get("channel_id"));
+        _adFuture = sab.load();
+        try {
+            _adGroup = _adFuture.get(10000, TimeUnit.MILLISECONDS);
+            _adGroup.registerObserver(_spotxAdListener);
+            if(_customEventInterstitialListener != null) {
+                _customEventInterstitialListener.onInterstitialLoaded();
+            }
+        }
+        catch (Exception e) {
+            if(_customEventInterstitialListener != null) {
+                //TODO: Infer and specify which kind of error this is based off event log tracking.
+                _customEventInterstitialListener.onInterstitialFailed(MoPubErrorCode.UNSPECIFIED);
+            }
+        }
     }
 
     @Override
     protected void showInterstitial() {
-        _adView.setVisibility(View.VISIBLE);
+        if(_adGroup != null){
+            InterstitialPresentationController.show(_ctx, _adGroup);
+        }
     }
 
     @Override
     protected void onInvalidate() {
-        _adView = null;
+        _adGroup = null;
     }
 }

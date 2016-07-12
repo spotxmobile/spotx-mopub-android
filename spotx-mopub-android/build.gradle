@@ -45,7 +45,7 @@ dependencies {
     compile('com.mopub:mopub-sdk:4.3.0@aar') {
         transitive = true
     }
-    compile 'com.spotxchange:spotx-sdk-android:2.2+@aar'
+    compile 'com.spotxchange:spotx-sdk-android:3.+'
 }
 
 android {
