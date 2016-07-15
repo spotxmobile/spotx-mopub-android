@@ -1,18 +1,13 @@
 package com.spotxchange.sdk.mopubintegration;
 
-import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.RelativeLayout;
+import android.support.annotation.Nullable;
 
 import com.mopub.mobileads.CustomEventInterstitial;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import com.mopub.mobileads.MoPubErrorCode;
 import com.spotxchange.v3.SpotX;
@@ -26,7 +21,6 @@ public class SpotXInterstitial extends CustomEventInterstitial {
 
     private CustomEventInterstitialListener _customEventInterstitialListener;
     private Context _ctx;
-    private Future<SpotXAdGroup> _adFuture;
     private SpotXAdGroup _adGroup;
 
     private final SpotXAdGroup.Observer _spotxAdListener = new SpotXAdGroup.Observer() {
@@ -38,25 +32,15 @@ public class SpotXInterstitial extends CustomEventInterstitial {
         }
 
         @Override
-        public void onStart(SpotXAd spotXAd) {
-        }
-
-        @Override
-        public void onComplete(SpotXAd spotXAd) {
-
-        }
-
-        @Override
-        public void onSkip(SpotXAd spotXAd) {
-
+        public void onClick(SpotXAd spotXAd) {
+            if(_customEventInterstitialListener != null) {
+                _customEventInterstitialListener.onInterstitialClicked();
+            }
         }
 
         @Override
         public void onError(SpotXAd spotXAd, Error error) {
-            if(_customEventInterstitialListener != null) {
-                //TODO: Infer and specify which kind of error this is based off event log tracking.
-                _customEventInterstitialListener.onInterstitialFailed(MoPubErrorCode.UNSPECIFIED);
-            }
+            fail(MoPubErrorCode.UNSPECIFIED.UNSPECIFIED);
         }
 
         @Override
@@ -67,18 +51,29 @@ public class SpotXInterstitial extends CustomEventInterstitial {
         }
 
         @Override
-        public void onTimeUpdate(SpotXAd spotXAd, int i) {
-
-        }
+        public void onStart(SpotXAd spotXAd) {}
 
         @Override
-        public void onClick(SpotXAd spotXAd) {
-            if(_customEventInterstitialListener != null) {
-                _customEventInterstitialListener.onInterstitialClicked();
-            }
-        }
+        public void onComplete(SpotXAd spotXAd) {}
+
+        @Override
+        public void onSkip(SpotXAd spotXAd) {}
+
+        @Override
+        public void onTimeUpdate(SpotXAd spotXAd, int i) {}
     };
 
+    @Override
+    protected void showInterstitial() {
+        if(_adGroup != null && _ctx != null){
+            InterstitialPresentationController.show(_ctx, _adGroup);
+        }
+    }
+
+    @Override
+    protected void onInvalidate() {
+        _adGroup = null;
+    }
 
     /**
      *
@@ -100,32 +95,62 @@ public class SpotXInterstitial extends CustomEventInterstitial {
         _customEventInterstitialListener = customEventInterstitialListener;
         Map<String, String> settings = Common.mergeSettings(localExtras, serverExtras);
         SpotX.initialize(_ctx);
-        SpotXAdBuilder sab = SpotX.newAdBuilder(settings.get("channel_id"));
-        _adFuture = sab.load();
-        try {
-            _adGroup = _adFuture.get(10000, TimeUnit.MILLISECONDS);
-            _adGroup.registerObserver(_spotxAdListener);
-            if(_customEventInterstitialListener != null) {
-                _customEventInterstitialListener.onInterstitialLoaded();
-            }
+        if(settings.containsKey("channel_id") && !settings.get("channel_id").isEmpty()) {
+            SpotXAdBuilder sab = SpotX.newAdBuilder(settings.get("channel_id"));
+            Common.insertParams(sab, settings);
+            AsyncLoader al = new AsyncLoader(sab, new InterstitialVideoCallback());
+            al.execute();
         }
-        catch (Exception e) {
-            if(_customEventInterstitialListener != null) {
-                //TODO: Infer and specify which kind of error this is based off event log tracking.
-                _customEventInterstitialListener.onInterstitialFailed(MoPubErrorCode.UNSPECIFIED);
-            }
+        else {
+            fail(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
         }
     }
 
-    @Override
-    protected void showInterstitial() {
-        if(_adGroup != null){
-            InterstitialPresentationController.show(_ctx, _adGroup);
+    private void fail(MoPubErrorCode error){
+        if(_customEventInterstitialListener != null) {
+            _customEventInterstitialListener.onInterstitialFailed(error);
         }
     }
 
-    @Override
-    protected void onInvalidate() {
-        _adGroup = null;
+    /**
+     * AsyncLoader callback used to handle successful or erroneous ad loads.
+     */
+    private class InterstitialVideoCallback implements AsyncLoader.Callback {
+
+        @Override
+        public void adLoadingStarted() {}
+
+        @Override
+        public void adLoadingFinished(@Nullable SpotXAdGroup adGroup) {
+            _adGroup = adGroup;
+            if(_adGroup == null) {
+                return;
+            }
+            else if(_adGroup.isEmpty()) {
+                fail(MoPubErrorCode.NETWORK_NO_FILL);
+            }
+            else {
+                _adGroup.registerObserver(_spotxAdListener);
+                if(_customEventInterstitialListener != null) {
+                    _customEventInterstitialListener.onInterstitialLoaded();
+                }
+            }
+        }
+
+        @Override
+        public void adLoadingError(Exception e) {
+            if(e instanceof InterruptedException) {
+                fail(MoPubErrorCode.CANCELLED);
+            }
+            else if(e instanceof ExecutionException) {
+                fail(MoPubErrorCode.UNSPECIFIED);
+            }
+            else if(e instanceof TimeoutException) {
+                fail(MoPubErrorCode.NETWORK_TIMEOUT);
+            }
+            else {
+                fail(MoPubErrorCode.UNSPECIFIED);
+            }
+        }
     }
 }

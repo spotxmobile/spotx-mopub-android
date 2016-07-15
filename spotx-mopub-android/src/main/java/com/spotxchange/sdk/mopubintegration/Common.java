@@ -1,26 +1,30 @@
 package com.spotxchange.sdk.mopubintegration;
 
+import com.spotxchange.v3.SpotXAdBuilder;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
+
 
 public class Common
 {
-    public static final String CHANNEL_ID_KEY           = "channel_id";
-    public static final String IAB_CATEGORY_KEY         = "iab_category";
-    public static final String APP_STORE_URL_KEY        = "appstore_url";
-    public static final String PLAY_STORE_URL_KEY       = "playstore_url";
-    public static final String APP_DOMAIN_KEY           = "app_domain";
-    public static final String PREFETCH_KEY             = "prefetch";
-    public static final String AUTO_INIT_KEY            = "auto_init";
-    public static final String IN_APP_BROWSER_KEY       = "in_app_browser";
-    public static final String SECURE_CONNECTION_KEY    = "use_https";
-
     public static Map<String, String> mergeSettings(Map<String,Object> localSettings, Map<String, String> defaultSettings) {
-        Map<String,String> settings = defaultSettings;
-        settings.putAll(
-                convertStringObjectMapToStringStringMap(localSettings)
-        );
-        return settings;
+
+        if(localSettings == null && defaultSettings == null) {
+            return new HashMap<String, String>();
+        }
+        else if(localSettings == null && defaultSettings != null) {
+            return defaultSettings;
+        }
+        else if(localSettings != null && defaultSettings == null) {
+            return convertStringObjectMapToStringStringMap(localSettings);
+        }
+        else {
+            Map<String, String> settings = defaultSettings;
+            settings.putAll(convertStringObjectMapToStringStringMap(localSettings));
+            return settings;
+        }
     }
 
     private static Map<String,String> convertStringObjectMapToStringStringMap(Map<String, Object> map) {
@@ -36,4 +40,33 @@ public class Common
         return newMap;
     }
 
+
+
+    /**
+     * Parse any custom or SpotX ad parameters from the settings map and put them
+     * to the ad builder.
+     *
+     * @param sab - SpotXAdBuilder
+     * @param settings - Settings passed via MoPub
+     */
+    public static void insertParams(SpotXAdBuilder sab, Map<String, String> settings) {
+
+        if(sab == null || settings == null) {
+            return;
+        }
+
+        if(settings.containsKey("use_https")
+                && (settings.get("use_https").equals("1") || settings.get("use_https").toLowerCase().equals("true"))) {
+            sab.useHTTPS(true);
+        }
+
+        for(String k : settings.keySet()){
+            if(k.startsWith("spotx_")){
+                sab.param(k.replaceFirst("spotx_", ""), settings.get(k));
+            }
+            else if(k.startsWith("custom_")) {
+                sab.custom(k.replaceFirst("custom_", ""), settings.get(k));
+            }
+        }
+    }
 }
