@@ -21,8 +21,8 @@ import com.mopub.common.MoPubReward;
 import com.mopub.mobileads.MoPubErrorCode;
 import com.mopub.mobileads.MoPubInterstitial;
 import com.mopub.mobileads.MoPubRewardedVideoListener;
-import com.spotxchange.sdk.mopubintegration.SpotXInterstitial;
-import com.spotxchange.sdk.mopubintegration.SpotXRewardedVideo;
+import com.spotxchange.v3.adapters.mopub.SpotXInterstitial;
+import com.spotxchange.v3.adapters.mopub.SpotXRewardedVideo;
 
 import java.util.Set;
 

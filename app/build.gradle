@@ -3,10 +3,15 @@ apply plugin: 'com.android.application'
 repositories {
     mavenCentral()
     jcenter()
+
 }
 
 dependencies {
-    compile project(':spotx-mopub-android')
+    compile ('com.spotxchange:spotx-sdk-android:3.1.0') {
+        transitive = false
+    }
+    compile 'com.google.android.gms:play-services-ads:+'
+    compile 'com.mopub:mopub-sdk:4.3.0'
 }
 
 android {
