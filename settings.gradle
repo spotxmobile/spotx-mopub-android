@@ -1,2 +1,2 @@
-include ':app', ':spotx-mopub-android'
+include ':app'
 rootProject.name = 'spotx-mopub'

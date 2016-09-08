@@ -9,27 +9,17 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-public class MoPubAdUnitAdapter extends ArrayAdapter<String> {
+public class MoPubRewardedVideoAdapter extends ArrayAdapter<String> {
 
     private final String[] _adUnitIds = {
-        "a12ce801e2b54fa0bb80b25e7562db13",
-        "6a02852e88aa429baa0b78b08169a31e",
-        "549619f76e5549a2816290e326e8c04d",
-        "211e8efa22f94eb491769ea7d100d00e",
-        "ed7e8d9c74714b7f93a70010fa67016d",
-        "80ae1ed7f1844ddc9a937ae3f22d14a8",
+            "5f56564aa4b1487cabb9b59cc3134b93",
     };
 
     private final String[] _adUnitNames = {
-        "85394 - Cattitude",
-        "93029 - Mixpo",
-        "116219 - Telemetry",
-        "103105 - Sizmek",
-        "103316 - Innovid",
-        "121277 - Snowmobile SSL",
+            "85394 - Cattitude - Rewarded Video",
     };
 
-    public MoPubAdUnitAdapter(Context context) {
+    public MoPubRewardedVideoAdapter(Context context) {
         super(context, android.R.layout.simple_list_item_2, android.R.id.text1);
         super.addAll(_adUnitIds);
     }
